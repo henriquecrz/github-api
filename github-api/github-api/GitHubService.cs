@@ -19,8 +19,25 @@ public class GitHubService
         }
     };
 
+    public static async Task<bool> CheckIfUserExists(string user)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync(user);
+
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+
+            return false;
+        }
+    }
+
     public static async Task<IEnumerable<User>> GetUsersDontFollowBack(string user)
     {
+        // WhenAll?
         var followers = await GetUsers(user, FOLLOWERS);
         var following = await GetUsers(user, FOLLOWING);
 
@@ -45,18 +62,25 @@ public class GitHubService
 
             try
             {
-                var usersResponse = await _httpClient.GetAsync($"{user}/{endpoint}?{queryString}");
-                var usersData = await usersResponse.Content.ReadAsStringAsync();
-                usersPaged = JsonConvert.DeserializeObject<User[]>(usersData);
+                var response = await _httpClient.GetAsync($"{user}/{endpoint}?{queryString}");
+                var content = await response.Content.ReadAsStringAsync();
 
-                if (usersPaged is not null)
+                if (response.IsSuccessStatusCode)
                 {
+                    usersPaged = JsonConvert.DeserializeObject<User[]>(content)!;
+
                     users.AddRange(usersPaged);
+                }
+                else
+                {
+                    var errorReponse = JsonConvert.DeserializeObject<NotFoundResponse>(content)!;
+
+                    Console.WriteLine($"GitHub response: '{errorReponse.Message}'");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
             }
 
             page++;
