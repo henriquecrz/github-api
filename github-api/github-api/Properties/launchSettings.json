@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "github-api": {
+      "commandName": "Project",
+      "commandLineArgs": "henriquecrz"
+    }
+  }
+}

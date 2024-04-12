@@ -12,11 +12,9 @@ internal partial class Program
                 .First()
                 .Replace(SpecialCharsRegex(), string.Empty);
 
+            Console.WriteLine($"GitHub user: {input}");
+
             await GetUsersDontFollowBack(input);
-        }
-        else
-        {
-            Console.WriteLine("");
         }
 
         string user;
